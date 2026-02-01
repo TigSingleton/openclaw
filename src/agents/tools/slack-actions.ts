@@ -15,6 +15,11 @@ import {
   removeSlackReaction,
   sendSlackMessage,
   unpinSlackMessage,
+  createSlackChannel,
+  listSlackChannels,
+  setSlackChannelTopic,
+  editSlackCanvas,
+  getSlackCanvasDetails,
 } from "../../slack/actions.js";
 import { parseSlackTarget, resolveSlackChannelId } from "../../slack/targets.js";
 import { withNormalizedTimestamp } from "../date-time.js";
@@ -281,9 +286,9 @@ export async function handleSlackAction(
     const normalizedPins = pins.map((pin) => {
       const message = pin.message
         ? withNormalizedTimestamp(
-            pin.message as Record<string, unknown>,
-            (pin.message as { ts?: unknown }).ts,
-          )
+          pin.message as Record<string, unknown>,
+          (pin.message as { ts?: unknown }).ts,
+        )
         : pin.message;
       return message ? { ...pin, message } : pin;
     });
@@ -303,10 +308,65 @@ export async function handleSlackAction(
 
   if (action === "emojiList") {
     if (!isActionEnabled("emojiList")) {
-      throw new Error("Slack emoji list is disabled.");
+      throw new Error("Slack emoji list are disabled.");
     }
     const emojis = readOpts ? await listSlackEmojis(readOpts) : await listSlackEmojis();
     return jsonResult({ ok: true, emojis });
+  }
+
+  if (action === "channel-create") {
+    if (!isActionEnabled("channels")) {
+      throw new Error("Slack channel management is disabled.");
+    }
+    const name = readStringParam(params, "name", { required: true });
+    const isPrivate = typeof params.private === "boolean" ? params.private : false;
+    const result = await createSlackChannel(name, isPrivate, writeOpts);
+    return jsonResult({ ok: true, result });
+  }
+
+  if (action === "channel-list") {
+    if (!isActionEnabled("channels")) {
+      throw new Error("Slack channel management is disabled.");
+    }
+    const types = readStringParam(params, "types") ?? undefined;
+    const result = await listSlackChannels(types, readOpts);
+    return jsonResult({ ok: true, result });
+  }
+
+  if (action === "channel-edit") {
+    if (!isActionEnabled("channels")) {
+      throw new Error("Slack channel management is disabled.");
+    }
+    const channelId = resolveChannelId();
+    const topic = readStringParam(params, "topic");
+    if (topic) {
+      const result = await setSlackChannelTopic(channelId, topic, writeOpts);
+      return jsonResult({ ok: true, result });
+    }
+    return jsonResult({ ok: true, message: "No changes provided for channel-edit" });
+  }
+
+  if (action === "canvas-edit") {
+    if (!isActionEnabled("canvases")) {
+      throw new Error("Slack canvases are disabled.");
+    }
+    const canvasId = readStringParam(params, "canvasId", { required: true });
+    const changesRaw = params.changes;
+    const changes = Array.isArray(changesRaw) ? changesRaw : [];
+    if (changes.length === 0) {
+      throw new Error("Changes array is required for canvas-edit");
+    }
+    const result = await editSlackCanvas(canvasId, changes, writeOpts);
+    return jsonResult({ ok: true, result });
+  }
+
+  if (action === "canvas-details") {
+    if (!isActionEnabled("canvases")) {
+      throw new Error("Slack canvases are disabled.");
+    }
+    const canvasId = readStringParam(params, "canvasId", { required: true });
+    const result = await getSlackCanvasDetails(canvasId, readOpts);
+    return jsonResult({ ok: true, result });
   }
 
   throw new Error(`Unknown action: ${action}`);

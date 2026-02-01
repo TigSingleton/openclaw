@@ -118,7 +118,7 @@ export async function removeOwnSlackReactions(
     return [];
   }
   await Promise.all(
-    Array.from(toRemove, (name) =>
+    Array.from(toRemove, (name: string) =>
       client.reactions.remove({
         channel: channelId,
         timestamp: messageId,
@@ -207,7 +207,7 @@ export async function readSlackMessages(
     return {
       // conversations.replies includes the parent message; drop it for replies-only reads.
       messages: (result.messages ?? []).filter(
-        (message) => (message as SlackMessageSummary)?.ts !== opts.threadId,
+        (message: any) => (message as SlackMessageSummary)?.ts !== opts.threadId,
       ) as SlackMessageSummary[],
       hasMore: Boolean(result.has_more),
     };
@@ -260,4 +260,46 @@ export async function listSlackPins(
   const client = await getClient(opts);
   const result = await client.pins.list({ channel: channelId });
   return (result.items ?? []) as SlackPin[];
+}
+
+export async function createSlackChannel(
+  name: string,
+  isPrivate: boolean = false,
+  opts: SlackActionClientOpts = {},
+) {
+  const client = await getClient(opts);
+  return await client.conversations.create({ name, is_private: isPrivate });
+}
+
+export async function listSlackChannels(
+  types: string = "public_channel,private_channel",
+  opts: SlackActionClientOpts = {},
+) {
+  const client = await getClient(opts);
+  return await client.conversations.list({ types, exclude_archived: true });
+}
+
+export async function setSlackChannelTopic(
+  channelId: string,
+  topic: string,
+  opts: SlackActionClientOpts = {},
+) {
+  const client = await getClient(opts);
+  return await client.conversations.setTopic({ channel: channelId, topic });
+}
+
+export async function editSlackCanvas(
+  canvasId: string,
+  changes: any[],
+  opts: SlackActionClientOpts = {},
+) {
+  const client = await getClient(opts);
+  // @ts-ignore - canvases might not be in the typings yet if they are old
+  return await client.canvases.edit({ canvas_id: canvasId, changes });
+}
+
+export async function getSlackCanvasDetails(canvasId: string, opts: SlackActionClientOpts = {}) {
+  const client = await getClient(opts);
+  // @ts-ignore
+  return await client.canvases.details({ canvas_id: canvasId });
 }

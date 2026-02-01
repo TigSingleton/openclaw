@@ -161,7 +161,8 @@ async function runGatewayCommand(opts: GatewayRunOpts) {
   const snapshot = await readConfigFileSnapshot().catch(() => null);
   const configExists = snapshot?.exists ?? fs.existsSync(CONFIG_PATH);
   const mode = cfg.gateway?.mode;
-  if (!opts.allowUnconfigured && mode !== "local") {
+  const isRailwayEnv = Boolean(process.env.RAILWAY_ENVIRONMENT);
+  if (!opts.allowUnconfigured && mode !== "local" && !isRailwayEnv) {
     if (!configExists) {
       defaultRuntime.error(
         `Missing config. Run \`${formatCliCommand("openclaw setup")}\` or set gateway.mode=local (or pass --allow-unconfigured).`,
@@ -177,10 +178,10 @@ async function runGatewayCommand(opts: GatewayRunOpts) {
   const bindRaw = toOptionString(opts.bind) ?? cfg.gateway?.bind ?? "loopback";
   const bind =
     bindRaw === "loopback" ||
-    bindRaw === "lan" ||
-    bindRaw === "auto" ||
-    bindRaw === "custom" ||
-    bindRaw === "tailnet"
+      bindRaw === "lan" ||
+      bindRaw === "auto" ||
+      bindRaw === "custom" ||
+      bindRaw === "tailnet"
       ? bindRaw
       : null;
   if (!bind) {
@@ -266,17 +267,17 @@ async function runGatewayCommand(opts: GatewayRunOpts) {
           auth:
             authMode || passwordRaw || tokenRaw || authModeRaw
               ? {
-                  mode: authMode ?? undefined,
-                  token: tokenRaw,
-                  password: passwordRaw,
-                }
+                mode: authMode ?? undefined,
+                token: tokenRaw,
+                password: passwordRaw,
+              }
               : undefined,
           tailscale:
             tailscaleMode || opts.tailscaleResetOnExit
               ? {
-                  mode: tailscaleMode ?? undefined,
-                  resetOnExit: Boolean(opts.tailscaleResetOnExit),
-                }
+                mode: tailscaleMode ?? undefined,
+                resetOnExit: Boolean(opts.tailscaleResetOnExit),
+              }
               : undefined,
         }),
     });

@@ -54,6 +54,16 @@ export function createSlackActions(providerId: string): ChannelMessageActionAdap
       if (isActionEnabled("emojiList")) {
         actions.add("emoji-list");
       }
+      if (isActionEnabled("channels")) {
+        actions.add("channel-create");
+        actions.add("channel-list");
+        actions.add("channel-info");
+        actions.add("channel-edit");
+      }
+      if (isActionEnabled("canvases")) {
+        actions.add("canvas-edit");
+        actions.add("canvas-details");
+      }
       return Array.from(actions);
     },
     extractToolSend: ({ args }): ChannelToolSend | null => {
@@ -212,6 +222,62 @@ export function createSlackActions(providerId: string): ChannelMessageActionAdap
       if (action === "emoji-list") {
         return await handleSlackAction(
           { action: "emojiList", accountId: accountId ?? undefined },
+          cfg,
+        );
+      }
+
+      if (action === "channel-create") {
+        const name = readStringParam(params, "name", { required: true });
+        const isPrivate = typeof params.private === "boolean" ? params.private : false;
+        return await handleSlackAction(
+          { action: "channel-create", name, private: isPrivate, accountId: accountId ?? undefined },
+          cfg,
+        );
+      }
+
+      if (action === "channel-list") {
+        const types = readStringParam(params, "types");
+        return await handleSlackAction(
+          { action: "channel-list", types, accountId: accountId ?? undefined },
+          cfg,
+        );
+      }
+
+      if (action === "channel-edit") {
+        const topic = readStringParam(params, "topic");
+        return await handleSlackAction(
+          {
+            action: "channel-edit",
+            channelId: resolveChannelId(),
+            topic,
+            accountId: accountId ?? undefined,
+          },
+          cfg,
+        );
+      }
+
+      if (action === "canvas-edit") {
+        const canvasId = readStringParam(params, "canvasId", { required: true });
+        const changes = params.changes;
+        return await handleSlackAction(
+          {
+            action: "canvas-edit",
+            canvasId,
+            changes,
+            accountId: accountId ?? undefined,
+          },
+          cfg,
+        );
+      }
+
+      if (action === "canvas-details") {
+        const canvasId = readStringParam(params, "canvasId", { required: true });
+        return await handleSlackAction(
+          {
+            action: "canvas-details",
+            canvasId,
+            accountId: accountId ?? undefined,
+          },
           cfg,
         );
       }

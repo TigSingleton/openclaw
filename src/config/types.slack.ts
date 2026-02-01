@@ -54,6 +54,8 @@ export type SlackActionConfig = {
   permissions?: boolean;
   memberInfo?: boolean;
   channelInfo?: boolean;
+  channels?: boolean;
+  canvases?: boolean;
   emojiList?: boolean;
 };
 

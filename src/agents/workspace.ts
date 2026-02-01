@@ -27,6 +27,8 @@ export const DEFAULT_HEARTBEAT_FILENAME = "HEARTBEAT.md";
 export const DEFAULT_BOOTSTRAP_FILENAME = "BOOTSTRAP.md";
 export const DEFAULT_MEMORY_FILENAME = "MEMORY.md";
 export const DEFAULT_MEMORY_ALT_FILENAME = "memory.md";
+export const DEFAULT_CREDENTIALS_FILENAME = "CREDENTIALS.md";
+export const DEFAULT_NOTES_FILENAME = "MIRA_NOTES.md";
 
 function stripFrontMatter(content: string): string {
   if (!content.startsWith("---")) {
@@ -64,7 +66,9 @@ export type WorkspaceBootstrapFileName =
   | typeof DEFAULT_HEARTBEAT_FILENAME
   | typeof DEFAULT_BOOTSTRAP_FILENAME
   | typeof DEFAULT_MEMORY_FILENAME
-  | typeof DEFAULT_MEMORY_ALT_FILENAME;
+  | typeof DEFAULT_MEMORY_ALT_FILENAME
+  | typeof DEFAULT_CREDENTIALS_FILENAME
+  | typeof DEFAULT_NOTES_FILENAME;
 
 export type WorkspaceBootstrapFile = {
   name: WorkspaceBootstrapFileName;
@@ -224,7 +228,7 @@ async function resolveMemoryBootstrapEntries(
     let key = entry.filePath;
     try {
       key = await fs.realpath(entry.filePath);
-    } catch {}
+    } catch { }
     if (seen.has(key)) {
       continue;
     }
@@ -241,35 +245,43 @@ export async function loadWorkspaceBootstrapFiles(dir: string): Promise<Workspac
     name: WorkspaceBootstrapFileName;
     filePath: string;
   }> = [
-    {
-      name: DEFAULT_AGENTS_FILENAME,
-      filePath: path.join(resolvedDir, DEFAULT_AGENTS_FILENAME),
-    },
-    {
-      name: DEFAULT_SOUL_FILENAME,
-      filePath: path.join(resolvedDir, DEFAULT_SOUL_FILENAME),
-    },
-    {
-      name: DEFAULT_TOOLS_FILENAME,
-      filePath: path.join(resolvedDir, DEFAULT_TOOLS_FILENAME),
-    },
-    {
-      name: DEFAULT_IDENTITY_FILENAME,
-      filePath: path.join(resolvedDir, DEFAULT_IDENTITY_FILENAME),
-    },
-    {
-      name: DEFAULT_USER_FILENAME,
-      filePath: path.join(resolvedDir, DEFAULT_USER_FILENAME),
-    },
-    {
-      name: DEFAULT_HEARTBEAT_FILENAME,
-      filePath: path.join(resolvedDir, DEFAULT_HEARTBEAT_FILENAME),
-    },
-    {
-      name: DEFAULT_BOOTSTRAP_FILENAME,
-      filePath: path.join(resolvedDir, DEFAULT_BOOTSTRAP_FILENAME),
-    },
-  ];
+      {
+        name: DEFAULT_AGENTS_FILENAME,
+        filePath: path.join(resolvedDir, DEFAULT_AGENTS_FILENAME),
+      },
+      {
+        name: DEFAULT_SOUL_FILENAME,
+        filePath: path.join(resolvedDir, DEFAULT_SOUL_FILENAME),
+      },
+      {
+        name: DEFAULT_TOOLS_FILENAME,
+        filePath: path.join(resolvedDir, DEFAULT_TOOLS_FILENAME),
+      },
+      {
+        name: DEFAULT_IDENTITY_FILENAME,
+        filePath: path.join(resolvedDir, DEFAULT_IDENTITY_FILENAME),
+      },
+      {
+        name: DEFAULT_USER_FILENAME,
+        filePath: path.join(resolvedDir, DEFAULT_USER_FILENAME),
+      },
+      {
+        name: DEFAULT_HEARTBEAT_FILENAME,
+        filePath: path.join(resolvedDir, DEFAULT_HEARTBEAT_FILENAME),
+      },
+      {
+        name: DEFAULT_BOOTSTRAP_FILENAME,
+        filePath: path.join(resolvedDir, DEFAULT_BOOTSTRAP_FILENAME),
+      },
+      {
+        name: DEFAULT_CREDENTIALS_FILENAME,
+        filePath: path.join(resolvedDir, DEFAULT_CREDENTIALS_FILENAME),
+      },
+      {
+        name: DEFAULT_NOTES_FILENAME,
+        filePath: path.join(resolvedDir, DEFAULT_NOTES_FILENAME),
+      },
+    ];
 
   entries.push(...(await resolveMemoryBootstrapEntries(resolvedDir)));
 
