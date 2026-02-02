@@ -1,3 +1,4 @@
+import process from "node:process";
 import type { CanvasHostServer } from "../canvas-host/server.js";
 import type { PluginServicesHandle } from "../plugins/services.js";
 import type { RuntimeEnv } from "../runtime.js";
@@ -187,8 +188,8 @@ export async function startGatewayServer(
     const issues =
       configSnapshot.issues.length > 0
         ? configSnapshot.issues
-            .map((issue) => `${issue.path || "<root>"}: ${issue.message}`)
-            .join("\n")
+          .map((issue) => `${issue.path || "<root>"}: ${issue.message}`)
+          .join("\n")
         : "Unknown validation issue.";
     throw new Error(
       `Invalid config at ${configSnapshot.path}.\n${issues}\nRun "${formatCliCommand("openclaw doctor")}" to repair, then retry.`,
