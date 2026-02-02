@@ -39,7 +39,8 @@ export async function resolveGatewayRuntimeConfig(params: {
   auth?: GatewayAuthConfig;
   tailscale?: GatewayTailscaleConfig;
 }): Promise<GatewayRuntimeConfig> {
-  const isRailwayEnv = Boolean(process.env.RAILWAY_ENVIRONMENT);
+  const isRailwayEnv =
+    Boolean(process.env.RAILWAY_ENVIRONMENT) || Boolean(process.env.RAILWAY_PROJECT_ID);
   const bindMode = params.bind ?? params.cfg.gateway?.bind ?? (isRailwayEnv ? "lan" : "loopback");
   const customBindHost = params.cfg.gateway?.customBindHost;
   const bindHost = params.host ?? (await resolveGatewayBindHost(bindMode, customBindHost));
@@ -80,7 +81,10 @@ export async function resolveGatewayRuntimeConfig(params: {
   const canvasHostEnabled =
     process.env.OPENCLAW_SKIP_CANVAS_HOST !== "1" && params.cfg.canvasHost?.enabled !== false;
 
-  assertGatewayAuthConfigured(resolvedAuth);
+  if (!isRailwayEnv) {
+    assertGatewayAuthConfigured(resolvedAuth);
+  }
+
   if (tailscaleMode === "funnel" && authMode !== "password") {
     throw new Error(
       "tailscale funnel requires gateway auth mode=password (set gateway.auth.password or OPENCLAW_GATEWAY_PASSWORD)",
