@@ -1,3 +1,4 @@
+import process from "node:process";
 import type { Command } from "commander";
 import fs from "node:fs";
 import type { GatewayAuthMode } from "../../config/config.js";
