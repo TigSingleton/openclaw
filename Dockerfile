@@ -44,4 +44,4 @@ USER node
 
 EXPOSE 8080
 
-CMD ["node", "dist/index.js", "gateway", "run"]
+CMD ["node", "dist/index.js", "gateway", "run", "--port", "8080", "--bind", "lan", "--allow-unconfigured"]
